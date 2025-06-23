@@ -93,9 +93,16 @@
     <ul id="messages" class="chat-messages"></ul>
     <div class="chat-form">
         <div class="input-row">
-            <input type="text" id="groupId" placeholder="Group ID" />
+            <select id="groupId">
+                <option value="">-- Select Group --</option>
+                <option th:each="group : ${groups}"
+                        th:value="${group.id}"
+                        th:text="${group.name}">
+                </option>
+            </select>
             <input type="text" id="sender" placeholder="Your name" />
         </div>
+
         <div class="input-row">
             <input type="text" id="content" placeholder="Type a message..." />
             <button onclick="sendMessage()">Send</button>

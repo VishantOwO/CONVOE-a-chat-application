@@ -1,9 +1,26 @@
 package com.Vishant.Convoe.model;
 
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+@Entity
 public class ChatMessage {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String sender;
     private String content;
 
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private ChatGroup group;
+
+    private LocalDateTime timestamp = LocalDateTime.now();
+
+    //Constructors and getter and setters
     public ChatMessage() {
     }
 
@@ -26,5 +43,9 @@ public class ChatMessage {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public void setGroup(ChatGroup group) {
+        this.group=group;
     }
 }
