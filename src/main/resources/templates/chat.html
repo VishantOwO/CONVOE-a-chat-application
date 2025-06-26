@@ -92,6 +92,7 @@
     <div class="chat-header">💬 Convoe Chat</div>
     <ul id="messages" class="chat-messages"></ul>
     <div class="chat-form">
+
         <div class="input-row">
             <select id="groupId">
                 <option value="">-- Select Group --</option>
@@ -107,6 +108,8 @@
             <input type="text" id="content" placeholder="Type a message..." />
             <button onclick="sendMessage()">Send</button>
         </div>
+        <input type="text" id="newGroupName" placeholder="New group name" />
+        <button onclick="createGroup()">Create Group</button>
     </div>
 </div>
 
@@ -160,6 +163,24 @@
         newMessage.textContent = `${sender}: ${content}`;
         messageList.appendChild(newMessage);
         messageList.scrollTop = messageList.scrollHeight;
+    }
+
+    function createGroup() {
+        const groupName = document.getElementById('newGroupName').value.trim();
+        if (!groupName) return;
+
+        fetch('/api/groups/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name: groupName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Group created: ' + data.name);
+            location.reload(); // refresh to reload dropdown
+        });
     }
 
     // Optional: preload connection to a default group

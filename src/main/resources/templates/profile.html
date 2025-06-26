@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - Convoe</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .profile-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 30px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+    }
+
+    .avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 48px;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .avatar:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    }
+
+    .user-name {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 10px;
+    }
+
+    .user-role {
+        display: inline-block;
+        padding: 8px 20px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .profile-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+
+    .profile-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card-title i {
+        color: #667eea;
+        font-size: 1.2rem;
+    }
+
+    .info-group {
+        margin-bottom: 20px;
+    }
+
+    .info-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        color: #2d3748;
+        font-weight: 500;
+        padding: 10px 0;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .status-active {
+        background: rgba(72, 187, 120, 0.1);
+        color: #38a169;
+    }
+
+    .status-inactive {
+        background: rgba(245, 101, 101, 0.1);
+        color: #e53e3e;
+    }
+
+    .action-buttons {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.9);
+        color: #2d3748;
+        border: 2px solid #e2e8f0;
+    }
+
+    .btn-secondary:hover {
+        background: #f7fafc;
+        border-color: #cbd5e0;
+        transform: translateY(-2px);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 20px;
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 15px;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: scale(1.05);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #718096;
+        margin-top: 5px;
+    }
+
+    @media (max-width: 768px) {
+        .profile-content {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            font-size: 40px;
+        }
+
+        .user-name {
+            font-size: 1.8rem;
+        }
+    }
+
+    .back-btn {
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: #2d3748;
+    }
+
+    .back-btn:hover {
+        background: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back-btn">
+    <i class="fas fa-arrow-left"></i>
+  </a>
+
+  <div class="profile-header">
+    <div class="avatar" th:text="${user.fullName != null and user.fullName.length() > 0 ? user.fullName.substring(0, 1).toUpperCase() : 'U'}">
+      U
+    </div>
+    <h1 class="user-name" th:text="${user.fullName}">Full Name</h1>
+    <span class="user-role" th:text="${user.role != null ? user.role.name().replace('ROLE_', '') : 'USER'}">USER</span>
+  </div>
+
+  <div class="profile-content">
+    <div class="profile-card">
+      <h2 class="card-title">
+        <i class="fas fa-user"></i>
+        Personal Information
+      </h2>
+
+      <div class="info-group">
+        <div class="info-label">Username</div>
+        <div class="info-value" th:text="${user.username}">username</div>
+      </div>
+
+      <div class="info-group">
+        <div class="info-label">Full Name</div>
+        <div class="info-value" th:text="${user.fullName}">Full Name</div>
+      </div>
+
+      <div class="info-group">
+        <div class="info-label">Email Address</div>
+        <div class="info-value" th:text="${user.email}">email@example.com</div>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <h2 class="card-title">
+        <i class="fas fa-shield-alt"></i>
+        Account Status
+      </h2>
+
+      <div class="info-group">
+        <div class="info-label">Account Status</div>
+        <div class="info-value">
+                        <span class="status-badge" th:classappend="${user.enabled} ? 'status-active' : 'status-inactive'">
+                            <i class="fas fa-circle"></i>
+                            <span th:text="${user.enabled} ? 'Active' : 'Inactive'">Active</span>
+                        </span>
+        </div>
+      </div>
+
+      <div class="info-group">
+        <div class="info-label">Member Since</div>
+        <div class="info-value" th:text="${createdDate}">01 Jan 2024</div>
+      </div>
+
+      <div class="info-group">
+        <div class="info-label">Last Login</div>
+        <div class="info-value" th:text="${user.lastLogin != null ? user.lastLogin.format(T(java.time.format.DateTimeFormatter).ofPattern('dd MMM yyyy, HH:mm')) : 'Never'}">Never</div>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <h2 class="card-title">
+        <i class="fas fa-chart-bar"></i>
+        Activity Stats
+      </h2>
+
+      <div class="stats-grid">
+        <div class="stat-item">
+          <span class="stat-number">24</span>
+          <div class="stat-label">Messages Sent</div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">8</span>
+          <div class="stat-label">Conversations</div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">12</span>
+          <div class="stat-label">Active Days</div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">3</span>
+          <div class="stat-label">Groups Joined</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <h2 class="card-title">
+        <i class="fas fa-cog"></i>
+        Account Security
+      </h2>
+
+      <div class="info-group">
+        <div class="info-label">Account Locked</div>
+        <div class="info-value">
+                        <span class="status-badge" th:classappend="${user.accountNonLocked} ? 'status-active' : 'status-inactive'">
+                            <i class="fas fa-circle"></i>
+                            <span th:text="${user.accountNonLocked} ? 'No' : 'Yes'">No</span>
+                        </span>
+        </div>
+      </div>
+
+      <div class="info-group">
+        <div class="info-label">Credentials Expired</div>
+        <div class="info-value">
+                        <span class="status-badge" th:classappend="${user.credentialsNonExpired} ? 'status-active' : 'status-inactive'">
+                            <i class="fas fa-circle"></i>
+                            <span th:text="${user.credentialsNonExpired} ? 'No' : 'Yes'">No</span>
+                        </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <a href="/profile/edit" class="btn btn-primary">
+        <i class="fas fa-edit"></i>
+        Edit Profile
+      </a>
+      <a href="/profile/settings" class="btn btn-secondary">
+        <i class="fas fa-cog"></i>
+        Account Settings
+      </a>
+      <a href="/profile/security" class="btn btn-secondary">
+        <i class="fas fa-shield-alt"></i>
+        Security Settings
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Add some interactive animations
+  document.addEventListener('DOMContentLoaded', function() {
+      // Animate cards on scroll
+      const cards = document.querySelectorAll('.profile-card');
+      const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                  entry.target.style.opacity = '1';
+                  entry.target.style.transform = 'translateY(0)';
+              }
+          });
+      });
+
+      cards.forEach(card => {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+          observer.observe(card);
+      });
+
+      // Avatar click effect
+      const avatar = document.querySelector('.avatar');
+      avatar.addEventListener('click', function() {
+          this.style.transform = 'scale(1.1)';
+          setTimeout(() => {
+              this.style.transform = 'scale(1)';
+          }, 200);
+      });
+  });
+</script>
+</body>
+</html>
