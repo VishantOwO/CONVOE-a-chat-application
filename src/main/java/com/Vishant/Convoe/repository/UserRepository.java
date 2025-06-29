@@ -28,4 +28,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findAllByEnabledTrue();
 
+    @Query("SELECT u FROM User u WHERE u.username LIKE %:search% OR u.email LIKE %:search%")
+    List<User> findByUsernameOrEmailContaining(@Param("search") String search);
+
+    @Query(value = "SELECT * FROM users u WHERE u.id NOT IN (SELECT user_id FROM group_members WHERE group_id = :groupId)", nativeQuery = true)
+    List<User> findUsersNotInGroup(@Param("groupId") Long groupId);
+
+
 }

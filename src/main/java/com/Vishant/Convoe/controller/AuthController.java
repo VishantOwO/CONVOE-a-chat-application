@@ -3,6 +3,7 @@ package com.Vishant.Convoe.controller;
 import com.Vishant.Convoe.model.User;
 import com.Vishant.Convoe.repository.UserRepository;
 import com.Vishant.Convoe.util.JwtUtil;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Optional;
 
 import com.Vishant.Convoe.dto.UserRegistrationDto;
 import com.Vishant.Convoe.model.User;
@@ -151,6 +153,9 @@ public class AuthController {
         }
         return "redirect:/login";
     }
+
+
+
 
 
 }

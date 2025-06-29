@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -103,4 +104,22 @@ public class UserService {
         }
         throw new RuntimeException("User not found with id: " + userId);
     }
+
+
+    public List<User> searchUsers(String search) {
+        return userRepository.findByUsernameOrEmailContaining(search);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public Optional<User> validateUser(String username, String password) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isPresent() && passwordEncoder.matches(password, userOpt.get().getPassword())) {
+            return userOpt;
+        }
+        return Optional.empty();
+    }
+
 }

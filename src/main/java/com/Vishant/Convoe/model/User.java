@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -41,8 +43,22 @@ public class User implements UserDetails {
     @Size(min = 8, message = "Password must be at least 8 characters long")
     private String password;
 
+    @ManyToMany(mappedBy = "members")
+    private Set<ChatGroup> groups = new HashSet<>();
+
+    @OneToMany(mappedBy = "sender")
+    private Set<GroupMessage> sentMessages = new HashSet<>();
+
     @Column(nullable = false)
     private boolean enabled = true;
+
+    public Set<ChatGroup> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(Set<ChatGroup> groups) {
+        this.groups = groups;
+    }
 
     @Column(nullable = false)
     private boolean accountNonExpired = true;
@@ -145,4 +161,11 @@ public class User implements UserDetails {
     public void setUpdatedAt(LocalDateTime now) {
     }
 
+    public Set<GroupMessage> getSentMessages() {
+        return sentMessages;
+    }
+
+    public void setSentMessages(Set<GroupMessage> sentMessages) {
+        this.sentMessages = sentMessages;
+    }
 }

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Group Chat - ' + ${group.name}">Group Chat</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .chat-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            height: calc(100vh - 4rem);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .group-title {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .group-description {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .member-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            background: #f8f9fa;
+            max-height: calc(100vh - 300px);
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .message.own-message {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            max-width: 70%;
+        }
+
+        .message-bubble {
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            word-wrap: break-word;
+        }
+
+        .own-message .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .own-message .message-info {
+            flex-direction: row-reverse;
+            text-align: right;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .message-time {
+            color: #999;
+        }
+
+        .message-form {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .message-input-container {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+            resize: none;
+            min-height: 45px;
+            max-height: 120px;
+        }
+
+        .message-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .no-messages {
+            text-align: center;
+            color: #666;
+            padding: 3rem;
+            font-style: italic;
+        }
+
+        .alert {
+            margin: 1rem 2rem 0;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                margin: 1rem;
+                height: calc(100vh - 2rem);
+                border-radius: 10px;
+            }
+
+            .chat-header {
+                padding: 1rem;
+            }
+
+            .group-title {
+                font-size: 1.2rem;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+
+            .action-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .message-form {
+                padding: 1rem;
+            }
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 0.5rem 1rem;
+            background: #e9ecef;
+            border-radius: 15px;
+            margin: 0.5rem 1rem;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <!-- Chat Header -->
+    <div class="chat-header">
+        <div class="chat-header-left">
+            <a th:href="@{/groups}" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="group-title" th:text="${group.name}">Group Name</h1>
+                <p class="group-description" th:text="${group.description}">Group Description</p>
+            </div>
+            <span class="member-count">
+                    <i class="fas fa-users"></i>
+                    <span th:text="${#sets.size(group.members)}">0</span> members
+                </span>
+        </div>
+        <div class="header-actions">
+            <a th:href="@{'/groups/' + ${group.id} + '/members'}" class="action-btn">
+                <i class="fas fa-user-plus"></i>
+                <span class="d-none d-md-inline">Members</span>
+            </a>
+            <a th:if="${group.createdBy.id == currentUser.id}"
+               th:href="@{'/groups/' + ${group.id} + '/edit'}"
+               class="action-btn">
+                <i class="fas fa-edit"></i>
+                <span class="d-none d-md-inline">Edit</span>
+            </a>
+            <div class="dropdown">
+                <button class="action-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <ul class="dropdown-menu">
+                    <li th:if="${group.createdBy.id == currentUser.id}">
+                        <form th:action="@{'/groups/' + ${group.id} + '/delete'}" method="post"
+                              onsubmit="return confirm('Are you sure you want to delete this group?')">
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="fas fa-trash"></i> Delete Group
+                            </button>
+                        </form>
+                    </li>
+                    <li th:if="${group.createdBy.id != currentUser.id}">
+                        <form th:action="@{'/groups/' + ${group.id} + '/leave'}" method="post"
+                              onsubmit="return confirm('Are you sure you want to leave this group?')">
+                            <button type="submit" class="dropdown-item text-warning">
+                                <i class="fas fa-sign-out-alt"></i> Leave Group
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="messages-container" id="messagesContainer">
+        <div th:if="${#lists.isEmpty(messages)}" class="no-messages">
+            <i class="fas fa-comments fa-3x mb-3" style="color: #ccc;"></i>
+            <p>No messages yet. Start the conversation!</p>
+        </div>
+
+        <div th:each="message : ${messages}"
+             th:class="'message' + (${message.sender.id == currentUser.id} ? ' own-message' : '')">
+            <div class="message-avatar"
+                 th:text="${#strings.substring(message.sender.username, 0, 1).toUpperCase()}">
+            </div>
+            <div class="message-content">
+                <div class="message-info">
+                    <span class="message-sender" th:text="${message.sender.username}">Username</span>
+                    <span class="message-time"
+                          th:text="${#temporals.format(message.sentAt, 'MMM dd, yyyy HH:mm')}">
+                            Time
+                        </span>
+                </div>
+                <div class="message-bubble">
+                    <p th:text="${message.content}" style="margin: 0;">Message content</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div id="typingIndicator" class="typing-indicator">
+        <span id="typingText">Someone is typing...</span>
+    </div>
+
+    <!-- Message Form -->
+    <form th:action="@{'/groups/' + ${group.id} + '/messages'}" method="post" class="message-form">
+        <div class="message-input-container">
+                <textarea
+                        name="content"
+                        class="message-input"
+                        placeholder="Type your message..."
+                        required
+                        rows="1"
+                        id="messageInput"
+                        onkeydown="handleKeyDown(event)"
+                        oninput="autoResize(this)"></textarea>
+            <button type="submit" class="send-btn" id="sendBtn">
+                <i class="fas fa-paper-plane"></i>
+                <span class="d-none d-md-inline">Send</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Auto-resize textarea
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    }
+
+    // Handle Enter key for sending messages
+    function handleKeyDown(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            document.getElementById('sendBtn').click();
+        }
+    }
+
+    // Scroll to bottom of messages
+    function scrollToBottom() {
+        const container = document.getElementById('messagesContainer');
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // Auto-scroll to bottom on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        scrollToBottom();
+
+        // Focus on message input
+        document.getElementById('messageInput').focus();
+    });
+
+    // Simulate typing indicator (you can enhance this with WebSocket for real-time)
+    let typingTimer;
+    const messageInput = document.getElementById('messageInput');
+    const typingIndicator = document.getElementById('typingIndicator');
+
+    messageInput.addEventListener('input', function() {
+        clearTimeout(typingTimer);
+
+        if (this.value.trim()) {
+            typingIndicator.style.display = 'block';
+            scrollToBottom();
+
+            typingTimer = setTimeout(() => {
+                typingIndicator.style.display = 'none';
+            }, 1000);
+        } else {
+            typingIndicator.style.display = 'none';
+        }
+    });
+
+    // Auto-refresh messages every 5 seconds (basic polling - replace with WebSocket for better performance)
+    setInterval(function() {
+        // You can implement AJAX polling here or use WebSocket for real-time updates
+        // For now, we'll just refresh the page if there are new messages
+        // This is a basic implementation - consider using WebSocket or Server-Sent Events for production
+    }, 5000);
+
+    // Form submission handling
+    document.querySelector('.message-form').addEventListener('submit', function(e) {
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        if (!messageInput.value.trim()) {
+            e.preventDefault();
+            return;
+        }
+
+        // Disable send button to prevent double submission
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span class="d-none d-md-inline">Sending...</span>';
+
+        // Re-enable after a short delay (form will redirect anyway)
+        setTimeout(() => {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> <span class="d-none d-md-inline">Send</span>';
+        }, 2000);
+    });
+
+    // Enhanced scroll behavior
+    const messagesContainer = document.getElementById('messagesContainer');
+    let isUserScrolling = false;
+
+    messagesContainer.addEventListener('scroll', function() {
+        const isAtBottom = this.scrollTop + this.clientHeight >= this.scrollHeight - 5;
+        isUserScrolling = !isAtBottom;
+    });
+
+    // Only auto-scroll if user is not manually scrolling
+    function smartScrollToBottom() {
+        if (!isUserScrolling) {
+            scrollToBottom();
+        }
+    }
+</script>
+</body>
+</html>
